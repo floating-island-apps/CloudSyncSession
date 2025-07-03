@@ -110,9 +110,10 @@ public class CloudSyncSession {
 
     func dispatch(event: SyncEvent) {
         dispatchQueue.async {
+            // Send event only once at the beginning of processing
+            self.eventsPublisher.send(event)
+            
             func next(event: SyncEvent, middlewaresToRun: [AnyMiddleware]) -> SyncEvent {
-                self.eventsPublisher.send(event)
-
                 if let middleware = middlewaresToRun.last {
                     return middleware.run(
                         next: { event in
