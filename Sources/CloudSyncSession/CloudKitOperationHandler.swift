@@ -140,9 +140,22 @@ public class CloudKitOperationHandler: OperationHandler {
 
         operation.modifyRecordsCompletionBlock = { serverRecords, deletedRecordIDs, error in
             if let error = error {
-                self.onOperationError(error)
+                if let ckError = error as? CKError, ckError.code == .partialFailure {
+                    os_log(
+                        "Partial failure modifying records, but treating as success for successfully processed records. Error: %{public}@",
+                        log: self.log,
+                        type: .error,
+                        String(describing: error)
+                    )
 
-                completion(.failure(error))
+                    self.onOperationSuccess()
+
+                    completion(.success(ModifyOperation.Response(savedRecords: serverRecords ?? [], deletedRecordIDs: deletedRecordIDs ?? [])))
+                } else {
+                    self.onOperationError(error)
+
+                    completion(.failure(error))
+                }
             } else {
                 self.onOperationSuccess()
 
