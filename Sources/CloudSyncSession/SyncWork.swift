@@ -136,8 +136,25 @@ public struct ModifyOperation: Identifiable, SyncOperation {
         let splitRecords: [[CKRecord]] = records.chunked(into: maxRecommendedRecordsPerOperation)
         let splitRecordIDsToDelete: [[CKRecord.ID]] = recordIDsToDelete.chunked(into: maxRecommendedRecordsPerOperation)
 
-        return splitRecords.map { ModifyOperation(records: $0, recordIDsToDelete: [], checkpointID: nil, userInfo: userInfo) } +
-            splitRecordIDsToDelete.enumerated().map { ModifyOperation(records: [], recordIDsToDelete: $0.element, checkpointID: $0.offset == splitRecordIDsToDelete.count - 1 ? checkpointID : nil, userInfo: userInfo) }
+        let recordOperations = splitRecords.enumerated().map { index, records in
+            ModifyOperation(
+                records: records,
+                recordIDsToDelete: [],
+                checkpointID: (index == splitRecords.count - 1 && splitRecordIDsToDelete.isEmpty) ? checkpointID : nil,
+                userInfo: userInfo
+            )
+        }
+        
+        let deleteOperations = splitRecordIDsToDelete.enumerated().map { index, recordIDs in
+            ModifyOperation(
+                records: [],
+                recordIDsToDelete: recordIDs,
+                checkpointID: (index == splitRecordIDsToDelete.count - 1) ? checkpointID : nil,
+                userInfo: userInfo
+            )
+        }
+
+        return recordOperations + deleteOperations
     }
 
     var splitInHalf: [ModifyOperation] {
