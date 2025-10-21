@@ -1,6 +1,6 @@
 import CloudKit
 
-public let maxRecommendedRecordsPerOperation = 300
+public let maxRecommendedRecordsPerOperation = 100
 
 public enum SyncWork: Identifiable {
     public enum Result {
