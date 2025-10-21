@@ -117,9 +117,9 @@ public struct ModifyOperation: Identifiable, SyncOperation {
     public let checkpointID: UUID?
     public let userInfo: [String: Any]?
 
-    var records: [CKRecord]
-    var recordIDsToDelete: [CKRecord.ID]
-    var retryCount: Int = 0
+    public var records: [CKRecord]
+    public var recordIDsToDelete: [CKRecord.ID]
+    public var retryCount: Int = 0
 
     public init(records: [CKRecord], recordIDsToDelete: [CKRecord.ID], checkpointID: UUID?, userInfo: [String: Any]?) {
         self.records = records
